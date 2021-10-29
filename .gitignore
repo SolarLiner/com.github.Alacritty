@@ -1,0 +1,4 @@
+.venv
+cargo-sources.json
+.flatpak-builder
+repo

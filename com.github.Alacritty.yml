@@ -1,0 +1,38 @@
+app-id: com.github.Alacritty
+runtime: org.freedesktop.Platform
+runtime-version: '21.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+command: alacritty
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  - --filesystem=xdg-config
+  - --talk-name=org.freedesktop.Flatpak
+modules:
+  - name: alacritty
+    buildsystem: simple
+    sources:
+      - cargo-sources.json
+      - type: dir
+        path: ./source/
+      - type: file
+        path: com.github.Alacritty.metainfo.xml
+    build-options:
+      append-path: /usr/lib/sdk/rust-stable/bin
+      env:
+        CARGO_HOME: /run/build/alacritty/cargo
+    build-commands:
+      - cargo --offline build --release --verbose
+      - install -Dm755 ./target/release/alacritty -t /app/bin
+      - install -Dm644 com.github.Alacritty.metainfo.xml /app/share/metainfo/com.github.Alacritty.metainfo.xml
+      - install -Dm644 extra/linux/Alacritty.desktop /app/share/applications/com.github.Alacritty.desktop
+      - install -Dm644 extra/logo/alacritty-term.svg /app/share/pixmaps/Alacritty.svg
+      - gzip -c extra/alacritty.man > alacritty.man.gz
+      - install -Dm644 alacritty.man.gz /app/share/man/man1/alacritty.1.gz
+      - rm alacritty.man.gz
+    post-install:
+      - tic -xe alacritty,alacritty-direct extra/alacritty.info
